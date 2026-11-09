@@ -146,3 +146,5 @@ class PaymentService:
         if not isinstance(key, str) or not key.strip():
             raise ValueError("Idempotency key is required")
         return key.strip()
+
+# Receipt formatting is provided by reporting.format_amount.
