@@ -9,4 +9,4 @@ def format_amount(amount, currency="RUB"):
         raise ValueError("Amount must be finite and non-negative")
     rounded = value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     text = f"{rounded:,.2f}".replace(",", " ").replace(".", ",")
-    return f"{text} USD"
+    return f"{text} {currency}"
