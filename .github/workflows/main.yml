@@ -1,0 +1,47 @@
+name: Payment CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: payment-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Tests and package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Compile Python sources
+        run: python -m compileall -q payment.py tests scripts
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate HTML documentation
+        run: python scripts/build_docs.py
+      - name: Build release archive
+        run: python scripts/package_release.py
+      - name: Upload documentation and release
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: shop-payments-${{ github.sha }}
+          path: |
+            build/docs/
+            dist/*.zip
+          if-no-files-found: error
+          retention-days: 14
